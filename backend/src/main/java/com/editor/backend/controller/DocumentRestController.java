@@ -70,7 +70,7 @@ public class DocumentRestController {
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "uploaded successfully");
-        response.put("userID", newUser.getUserId());
+        response.put("userId", newUser.getUserId());
         response.put("documentId", session.getDocId());
         response.put("editorCode", session.getEditorCode());
         response.put("viewerCode", session.getViewerCode());
