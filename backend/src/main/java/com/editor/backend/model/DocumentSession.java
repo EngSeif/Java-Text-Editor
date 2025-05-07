@@ -2,6 +2,7 @@ package com.editor.backend.model;
 import java.util.UUID;
 import com.editor.backend.service.CRDTService;
 import java.util.List;
+import java.util.ArrayList;
 
 
 public class DocumentSession {
@@ -16,6 +17,7 @@ public class DocumentSession {
         this.editorCode = "E-" + UUID.randomUUID().toString().substring(0, 8);
         this.viewerCode = "V-" + UUID.randomUUID().toString().substring(0, 8);
         this.docCRDT = new CRDTService();
+        this.docUsers = new ArrayList<>();
     }
 
     public boolean isEditor(String code) {
@@ -38,7 +40,6 @@ public class DocumentSession {
         return this.documentId;
     }
 
-    //* Maybe Change Later
     public CRDTService getDocCRDT() {
         return this.docCRDT;
     }

@@ -28,8 +28,8 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    public void showDocPage(boolean isEditor, String documentId, String editorCode, String viewerCode) {
-        docPage = new DocPage(this, isEditor, documentId, editorCode, viewerCode); // Save reference to DocPage
+    public void showDocPage(boolean isEditor, String documentId, String userId,String editorCode, String viewerCode) {
+        docPage = new DocPage(this, isEditor, documentId, userId, editorCode, viewerCode); // Save reference to DocPage
         Scene scene = new Scene(docPage.getRoot(), 800, 600);
         primaryStage.setTitle("Collaborative Text Editor - Document");
         primaryStage.setScene(scene);

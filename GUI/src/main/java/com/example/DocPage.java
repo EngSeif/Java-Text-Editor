@@ -35,6 +35,7 @@ public class DocPage {
     private String editorCode;
     private String viewerCode;
     private String documentId;
+    private String userId;
     private TextArea textArea;
     private TextArea lineNumbers;
 
@@ -44,12 +45,13 @@ public class DocPage {
     private VBox commentDisplayBox = new VBox(10); // New comment display panel
     private VBox activeUsersBox = new VBox(10); // Active users section
 
-    public DocPage(Main mainApp, boolean isEditor, String documentId, String editorCode, String viewerCode) {
+    public DocPage(Main mainApp, boolean isEditor, String documentId, String userId, String editorCode, String viewerCode) {
         this.mainApp = mainApp;
         this.isEditor = isEditor;
         this.editorCode = editorCode;
         this.viewerCode = viewerCode;
         this.documentId = documentId;
+        this.userId = userId;
 
         root = new BorderPane();
         rootWrapper = new StackPane(root);

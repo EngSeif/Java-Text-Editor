@@ -28,4 +28,17 @@ public class DocumentSessionService {
     public boolean documentSessionExists(String documentId) {
         return this.documentSessions.containsKey(documentId);
     }
+
+    public DocumentSession findDocumentSessionByCode(String inputCode) {
+        for (Map.Entry<String, DocumentSession> entry : documentSessions.entrySet()) {
+            if (entry.getValue().getEditorCode().equals(inputCode)) {
+                return entry.getValue();
+            }
+            else if (entry.getValue().getViewerCode().equals(inputCode)) {
+                return entry.getValue();
+            }
+        }
+        return null; // Return null if no match is found
+    }
+
 }

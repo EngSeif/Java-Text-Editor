@@ -54,7 +54,7 @@ public class HomePage {
                     JSONObject jsonResponse = new JSONObject(responseBody); // Parse the body content
 
                     // Use the extracted values from the JSON response
-                    mainApp.showDocPage(true, jsonResponse.getString("documentId"), jsonResponse.getString("editorCode"), jsonResponse.getString("viewerCode"));
+                    mainApp.showDocPage(true, jsonResponse.getString("documentId"), jsonResponse.getString("userId"), jsonResponse.getString("editorCode"), jsonResponse.getString("viewerCode"));
                 } else {
                     System.out.println("Error: " + statusCode);
                 }
@@ -97,6 +97,7 @@ public class HomePage {
 
                         mainApp.showDocPage(true,
                                 jsonResponse.getString("documentId"),
+                                jsonResponse.getString("userId"),
                                 jsonResponse.getString("editorCode"),
                                 jsonResponse.getString("viewerCode"));
 
@@ -127,32 +128,67 @@ public class HomePage {
         codeField.setPromptText("Enter Share Code");
         Button joinBtn = new Button("Join");
         joinBtn.setOnAction(e -> {
-            // For demo, assume code determines role
             try {
+                // Get entered code
                 String enteredCode = codeField.getText();
 
+                // Prepare the JSON request body
+                JSONObject jsonRequest = new JSONObject();
+                jsonRequest.put("enteredCode", enteredCode);
+
+                // Prepare the HTTP client and request
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8081/api/documents/userJoin/" + enteredCode))
-                        .POST(HttpRequest.BodyPublishers.noBody())
+                        .uri(URI.create("http://localhost:8081/api/documents/userJoin/"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonRequest.toString()))
                         .build();
 
+                // Send request and get response
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 System.out.println("User entered code: " + enteredCode);
                 System.out.println("Server response: " + response.body());
 
-                JSONObject jsonResponse = new JSONObject(response.body());
-                String role = jsonResponse.getString("role");
-                String documentId = jsonResponse.getString("documentId");
-            if (role.equalsIgnoreCase("none")) {
-                System.out.println("Code Not Valid");
-            }
-            else
-            {
-                mainApp.showDocPage(role.equalsIgnoreCase("editor"), documentId, generateShareCode(), generateShareCode());
-            }
+                int statusCode = response.statusCode();
+
+                // Handle 404 status code for invalid code
+                if (statusCode == 404) {
+                    System.out.println("Code Not Valid");
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid code. Please try again.");
+                    alert.setHeaderText("Join Error");
+                    alert.showAndWait();
+                } else if (statusCode >= 200 && statusCode < 300) {
+                    // Parse JSON response for successful status codes (2xx)
+                    JSONObject jsonResponse = new JSONObject(response.body());
+                    String role = jsonResponse.getString("role");
+                    String documentId = jsonResponse.getString("documentId");
+                    String userId = jsonResponse.getString("userId");
+
+                    // Check if the role is valid
+                    if (role.equalsIgnoreCase("none")) {
+                        System.out.println("Code Not Valid");
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid code. Please try again.");
+                        alert.setHeaderText("Join Error");
+                        alert.showAndWait();
+                    } else {
+                        // Show document page for valid role
+                        System.out.println("Role: " + role + ", Document ID: " + documentId);
+                        mainApp.showDocPage(role.equalsIgnoreCase("editor"), documentId, userId,"Hidden", "Hidden");
+                    }
+                } else {
+                    // Handle other non-2xx status codes
+                    System.out.println("Unexpected error: " + statusCode);
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "An unexpected error occurred. Status code: " + statusCode);
+                    alert.setHeaderText("Join Error");
+                    alert.showAndWait();
+                }
+
             } catch (Exception ex) {
+                // Handle any exceptions and print error
                 System.out.println("Error: " + ex.getMessage());
+                Alert alert = new Alert(Alert.AlertType.ERROR, "An error occurred: " + ex.getMessage());
+                alert.setHeaderText("Error");
+                alert.showAndWait();
             }
         });
         joinBox.getChildren().addAll(codeField, joinBtn);
@@ -165,13 +201,6 @@ public class HomePage {
         return root;
     }
 
-    private String generateShareCode() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder sb = new StringBuilder(6);
-        for (int i = 0; i < 6; i++) {
-            int idx = (int) (Math.random() * chars.length());
-            sb.append(chars.charAt(idx));
-        }
-        return sb.toString();
-    }
+
+
 }
